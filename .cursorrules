@@ -1,0 +1,110 @@
+{
+  "projectContext": {
+    "projectName": "Stripe Pricing API Tool SaaS",
+    "projectDescription": "A no-code platform for businesses to create Stripe-integrated pricing pages, run A/B tests, and optimize revenue.",
+    "targetAudience": "SaaS startups, e-commerce businesses, freelancers/agencies, and product managers.",
+    "userJourney": [
+      "1. Sign Up: User creates an account or logs in via Stripe OAuth.",
+      "2. Create Pricing Page: User selects a template (Basic, Pro, Enterprise) and customizes tiers.",
+      "3. Integrate Stripe: User connects Stripe account to enable payment processing.",
+      "4. Set Up A/B Tests: User creates variants (e.g., pricing tiers, CTAs) and defines traffic splits.",
+      "5. Launch & Monitor: User deploys the pricing page and views analytics (conversion rates, revenue impact)."
+    ],
+    "keyFeatures": [
+      "Drag-and-drop pricing page builder",
+      "Stripe subscription integration",
+      "A/B testing with statistical insights",
+      "Revenue analytics dashboard"
+    ]
+  },
+  "codingGuidelines": {
+    "frontend": {
+      "framework": "React (TypeScript)",
+      "styling": "Tailwind CSS for rapid UI development",
+      "requirements": "Responsive design, Stripe Elements for payment forms"
+    },
+    "backend": {
+      "language": "Node.js (Express)",
+      "database": "PostgreSQL for user data and A/B test results",
+      "integrations": "Stripe API, Plausible/PostHog for analytics"
+    },
+    "security": [
+      "Use environment variables for Stripe API keys",
+      "Encrypt sensitive user data at rest",
+      "Follow Stripe's PCI compliance guidelines"
+    ]
+  },
+  "externalReferences": {
+    "stripeDocs": "https://stripe.com/docs",
+    "abTestingBestPractices": "https://www.example.com/ab-testing-guide"
+  },
+  "formatter": {
+    "indentSize": 2,
+    "lineWidth": 100,
+    "useTabs": false,
+    "semicolons": true,
+    "quotes": "single",
+    "trailingComma": "es5"
+  },
+  "linter": {
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "warn",
+      "prefer-const": "error",
+      "no-undef": "error"
+    }
+  },
+  "typescript": {
+    "strict": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "ignore": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    "*.log"
+  ],
+  "search": {
+    "excludePatterns": [
+      "node_modules",
+      "dist",
+      "build",
+      ".next",
+      "coverage"
+    ]
+  },
+  "format": {
+    "enabled": true,
+    "formatOnSave": true
+  },
+  "database": {
+    "schemaChanges": {
+      "requireDocumentation": true,
+      "documentationPath": "docs/data_catalog.md",
+      "rules": [
+        {
+          "pattern": "create table|alter table|drop table",
+          "message": "Please update docs/data_catalog.md with schema changes",
+          "severity": "warning"
+        }
+      ]
+    }
+  },
+  "filePatterns": {
+    "database": ["*.sql", "supabase/**/*.sql"],
+    "documentation": ["docs/data_catalog.md"]
+  },
+  "reminders": {
+    "schemaChanges": [
+      "Update data_catalog.md when modifying database schema",
+      "Include purpose for new tables",
+      "Document all columns with descriptions",
+      "Update relationships section if needed"
+    ]
+  }
+}
