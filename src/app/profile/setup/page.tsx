@@ -3,18 +3,18 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
-const supabase = createClient();
-
-export default function LoginPage() {
+export default function ProfileSetupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    fullName: '',
+    companyName: '',
+    phoneNumber: '',
+    website: '',
   });
+  const supabase = createClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -28,15 +28,27 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          full_name: formData.fullName,
+          company_name: formData.companyName,
+          phone_number: formData.phoneNumber,
+          website: formData.website,
+          updated_at: new Date().toISOString(),
+        });
+
       if (error) throw error;
-      router.replace('/dashboard');
+
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
-      console.error('Error signing in:', err.message);
+      console.error('Error updating profile:', err.message);
     } finally {
       setIsLoading(false);
     }
@@ -47,16 +59,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Complete Your Profile
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              href="/auth/signup"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              create a new account
-            </Link>
+            Please provide your details to get started
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -65,32 +71,61 @@ export default function LoginPage() {
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+              <label htmlFor="fullName" className="sr-only">
+                Full Name
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="fullName"
+                name="fullName"
+                type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
+                placeholder="Full Name"
+                value={formData.fullName}
                 onChange={handleChange}
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
+              <label htmlFor="companyName" className="sr-only">
+                Company Name
               </label>
               <input
-                id="password"
-                name="password"
-                type="password"
+                id="companyName"
+                name="companyName"
+                type="text"
                 required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Company Name"
+                value={formData.companyName}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="phoneNumber" className="sr-only">
+                Phone Number
+              </label>
+              <input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Phone Number"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="website" className="sr-only">
+                Website
+              </label>
+              <input
+                id="website"
+                name="website"
+                type="url"
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
+                placeholder="Website (optional)"
+                value={formData.website}
                 onChange={handleChange}
               />
             </div>
@@ -105,7 +140,7 @@ export default function LoginPage() {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                'Sign in'
+                'Complete Profile'
               )}
             </button>
           </div>

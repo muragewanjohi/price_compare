@@ -5,14 +5,23 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
+  const { pathname } = req.nextUrl
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Get session
+  const { data: { session } } = await supabase.auth.getSession()
 
-  // If user is not signed in and the current path is not / or /auth/login,
-  // redirect the user to /auth/login
-  if (!session && !['/auth/login', '/auth/signup', '/'].includes(req.nextUrl.pathname)) {
+  // Define routes
+  const authRoutes = ['/auth/login', '/auth/signup']
+  const isAuthRoute = authRoutes.includes(pathname)
+  const isPublicRoute = ['/', '/auth/verify-email'].includes(pathname)
+
+  // If on auth route and logged in, redirect to dashboard
+  if (isAuthRoute && session) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
+  // If on protected route and not logged in, redirect to login
+  if (!isPublicRoute && !isAuthRoute && !session) {
     return NextResponse.redirect(new URL('/auth/login', req.url))
   }
 

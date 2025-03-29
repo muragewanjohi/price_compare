@@ -92,7 +92,12 @@
           "message": "Please update docs/data_catalog.md with schema changes",
           "severity": "warning"
         }
-      ]
+      ],
+      "preChangeCheck": {
+        "required": true,
+        "message": "Before making any database changes, first review and update docs/data_catalog.md",
+        "severity": "error"
+      }
     }
   },
   "filePatterns": {
