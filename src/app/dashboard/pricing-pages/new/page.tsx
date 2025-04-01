@@ -4,6 +4,7 @@ import { useState } from 'react';
 import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const supabase = createClient();
 
@@ -35,15 +36,42 @@ export default function NewPricingPage() {
   const [pageName, setPageName] = useState('');
 
   const handleCreatePage = async () => {
-    if (!selectedTemplate || !pageName) return;
+    if (!selectedTemplate || !pageName) {
+      toast.error('Please select a template and enter a page name');
+      return;
+    }
 
     try {
       setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) throw new Error('User not authenticated');
+      // Check authentication
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast.error('Authentication error. Please try logging in again.');
+        return;
+      }
 
-      const { data, error } = await supabase
+      if (!user) {
+        toast.error('Please log in to create a pricing page');
+        return;
+      }
+
+      // First, let's verify the pricing_pages table exists and we can query it
+      const { error: tableCheckError } = await supabase
+        .from('pricing_pages')
+        .select('id')
+        .limit(1);
+
+      if (tableCheckError) {
+        console.error('Table check error:', tableCheckError);
+        toast.error('Error accessing pricing pages. Please contact support.');
+        return;
+      }
+
+      // Create the pricing page
+      const { data, error: insertError } = await supabase
         .from('pricing_pages')
         .insert([
           {
@@ -58,16 +86,31 @@ export default function NewPricingPage() {
                 primaryColor: '#4F46E5',
                 secondaryColor: '#1E293B',
               },
+              showMonthlyYearlyToggle: true,
+              showComparisonTable: selectedTemplate !== 'basic',
+              showFAQ: selectedTemplate === 'pro' || selectedTemplate === 'enterprise',
             },
           },
         ])
         .select()
         .single();
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        toast.error(insertError.message || 'Error creating pricing page');
+        return;
+      }
+
+      if (!data) {
+        toast.error('No data returned after creating page');
+        return;
+      }
+
+      toast.success('Pricing page created successfully!');
       router.push(`/dashboard/pricing-pages/${data.id}/edit`);
     } catch (error) {
-      console.error('Error creating pricing page:', error);
+      console.error('Unexpected error:', error);
+      toast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }

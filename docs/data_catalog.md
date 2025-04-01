@@ -90,8 +90,8 @@
 | pricing_page_id | uuid                     | References pricing_pages.id                        |
 | name            | text                     | Tier name                                          |
 | description     | text                     | Tier description                                   |
-| price           | decimal                  | Price amount                                       |
-| interval        | text                     | 'month', 'year', or 'one_time'                    |
+| price           | decimal(10,2)           | Price amount                                       |
+| interval        | text                     | 'month', 'year', or 'one_time' (with check constraint) |
 | currency        | text                     | Currency code (default: 'usd')                     |
 | features        | jsonb                    | Array of features included                         |
 | highlight       | boolean                  | Whether to highlight this tier                     |
@@ -100,6 +100,20 @@
 | metadata        | jsonb                    | Additional metadata                                |
 | created_at      | timestamp with time zone | When the tier was created                         |
 | updated_at      | timestamp with time zone | When the tier was last updated                    |
+
+**Constraints**:
+- `interval` must be one of: 'month', 'year', 'one_time'
+- `currency` defaults to 'usd'
+- `highlight` defaults to false
+- `sort_order` defaults to 0
+- `features` defaults to empty array
+- `metadata` defaults to empty object
+- `updated_at` is automatically updated via trigger
+
+**Security**:
+- Row Level Security (RLS) enabled
+- Users can only access tiers for pricing pages they own
+
 ### 7. ab_tests
 **Purpose**: Manages A/B testing experiments for pricing pages.
 | Column Name  | Data Type                | Description                                        |
